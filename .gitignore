@@ -1,5 +1,8 @@
 *.net
 *.attr
 *.json
+*.log
 __pycache__
 *.cys
+credentials.py
+.ropeproject/
