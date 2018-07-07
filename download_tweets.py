@@ -4,10 +4,12 @@ import re
 import argparse
 import time
 import datetime
+import sys
 from collections import defaultdict
 from credentials import *
 
-
+### See credentials_example.py for an example of credentials
+# To get them, go on https://apps.twitter.com
 auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
 auth.set_access_token(access_token, access_token_secret)
 api = tweepy.API(auth)
@@ -90,7 +92,13 @@ def write_log(logfilename, tweets):
         if 'last' not in time_range.keys() or t > time_range['last']:
             time_range['last'] = t
 
+
+
     text = ""
+
+    ### Command
+    text += time.strftime("Command ran on %Y-%m-%d at %H:%m") + ': \n' +  ' '.join(sys.argv) + '\n\n'
+
     ### Number of tweets
     text += str(n_tweets) + " tweets were retreived.\n"
 
@@ -124,10 +132,6 @@ def write_log(logfilename, tweets):
 
 def main(hashtag, jsonfilename, logfilename, since, until):
     """ Main program """
-    ## Argument/options listing ================================================
-    ### File handling
-    outfile = open(jsonfilename, 'w')
-
     ## Check the hashtags validity =============================================
     ### TODO
 
@@ -151,21 +155,20 @@ def main(hashtag, jsonfilename, logfilename, since, until):
         tweets = retrieve_tweets(h, tweets, since=since, until=until)
 
     ## Write the json file
+    outfile = open(jsonfilename, 'w')
     json.dump(tweets, outfile)
 
     ## Write the log file
     if logfilename is not None:
         write_log(logfilename[0], tweets)
-
-    ## Closing the files =======================================================
     outfile.close()
-
 
 
 
 if __name__ == '__main__':
     parse = process_args()
     args = parse.parse_args()
+
 
     main(hashtag=args.hashtag, jsonfilename=args.json[0], logfilename=args.log,
          since=args.since, until=args.until)
