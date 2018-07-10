@@ -49,7 +49,7 @@ def tweets_to_hashtags(tweets, unique_mentions):
             if (pair1 < pair0):
                 entry = pair1 + "\t" + pair0
             else:
-                entry = pair1 + "\t" + pair1
+                entry = pair0 + "\t" + pair1
 
             # Retreive metrics: retweets and favorites
             rt = tweets[id]['rt']
@@ -202,8 +202,14 @@ def export_cytoscape(dico, outputfilename):
     """ Export a dico with hashtags or mentions to a file in the cytoscape format """
     f = open(outputfilename, 'w')
 
+    any_key = list(dico)[0]
+    if re.search('\\t', any_key):
+        firstcol = ['source\ttarget']
+    else:
+        firstcol = ['node']
+
     col = list(dico[list(dico)[0]].keys())
-    f.write('\t'.join(col))
+    f.write('\t'.join(firstcol + col))
     for val in dico.keys():
         f.write('\n' + val)
         for c in col:
