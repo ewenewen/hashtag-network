@@ -157,7 +157,7 @@ def tweets_to_attributes(tweets, unique_hashtags, unique_mentions):
         # Lowercase hashtags
         h = list(map(lambda x:x.lower(), tweets[id]['hashtags']))
 
-        # For each combination mention/user and hashtag, make/update an entry
+        # For each mention, make/update an entry
         for m2 in m:
             if m2 in unique_hashtags:
                 m2 = m2 + ' (user)'
@@ -173,6 +173,7 @@ def tweets_to_attributes(tweets, unique_hashtags, unique_mentions):
                 attr[m2]['rt'] += rt
                 attr[m2]['score'] = attr[m2]['mentions'] * (attr[m2]['fav'] + attr[m2]['rt'])
 
+        # For each user, make/update an entry
         for u2 in u:
             if u2 in unique_hashtags:
                 u2 = u2 + ' (user)'
@@ -182,6 +183,7 @@ def tweets_to_attributes(tweets, unique_hashtags, unique_mentions):
             else:
                 attr[u2]['tweets'] += 1
 
+        # For each hashtag, make/update an entry
         for h2 in h:
             if h2 in unique_mentions:
                 h2 = h2 + ' (hashtag)'
@@ -216,6 +218,71 @@ def export_cytoscape(dico, outputfilename):
             f.write('\t' + str(dico[val][c]))
     f.close()
 
+def export_gephi(dico, attributes, outputfilename):
+    """ Export the dico with hashtags or mentions or bipartite + attributes to a file in the gephi (GDF) format """
+
+    f = open(outputfilename, 'w')
+
+    ### Nodes ==========================================================================================================
+    col_attributes = attributes[list(attributes)[0]]
+    col_attributes_list = list(col_attributes.keys())
+
+    ## First line (type of variables, etc...)
+    f.write('nodedef>')
+    f.write('name VARCHAR')
+    for col in col_attributes_list:
+        if isinstance(col_attributes[col], str):
+            col_type = "VARCHAR"
+        elif isinstance(col_attributes[col], int):
+            col_type = "DOUBLE"
+        else:
+            col_type = "VARCHAR"
+        f.write(', ' + col + ' ' + col_type)
+
+    ## Actual filling of the data
+    for node in attributes.keys():
+        f.write('\n' + node)
+        for col in col_attributes_list:
+            f.write(',' + str(attributes[node][col]))
+
+
+    ### Edges ==========================================================================================================
+    col_edges = dico[list(dico)[0]]
+    col_edges_list = list(col_edges.keys())
+    f.write('\nedgedef>')
+    f.write('node1 VARCHAR, node2 VARCHAR')
+
+    ## First line (variables, etc)
+    for col in col_edges_list:
+        if isinstance(col_edges[col], str):
+            col_type = "VARCHAR"
+        elif isinstance(col_edges[col], int):
+            col_type = "DOUBLE"
+        else:
+            col_type = "VARCHAR"
+        f.write(', ' + col + ' ' + col_type)
+
+    ## Actual filling of the data
+    for edge in dico.keys():
+        f.write('\n' + edge.replace('\t', ','))
+        for col in col_edges_list:
+            f.write(',' + str(dico[edge][col]))
+
+    f.write('\n')
+    f.close()
+
+
+
+
+
+#    col = list(dico[list(dico)[0]].keys())
+#    f.write('\t'.join(firstcol + col))
+#    for val in dico.keys():
+#        f.write('\n' + val)
+#        for c in col:
+#            f.write('\t' + str(dico[val][c]))
+#    f.close()
+
 def list_hashtags(tweets):
     """ From tweets (dico), produce a list of hashtags """
     all_hashtags = []
@@ -239,7 +306,7 @@ def list_mentions(tweets):
 
 def main(jsonfilename, outputformat, outputfilename, exporttype):
     """ Main program """
-    ## Input ===================================================================
+    ## Input ===========================================================================================================
     tweets = json.load(open(jsonfilename, 'r'))
 
     ## Read tweets and create a list of unique hashtags, to know whether there
@@ -247,20 +314,20 @@ def main(jsonfilename, outputformat, outputfilename, exporttype):
     unique_hashtags = list_hashtags(tweets)
     unique_mentions = list_mentions(tweets)
 
-    ## Read tweets and compute hashtags metrics ================================
+    ## Read tweets and compute hashtags metrics ========================================================================
     hashtags = tweets_to_hashtags(tweets, unique_mentions)
 
-    ## Read tweets and compute hashtags metrics ================================
+    ## Read tweets and compute hashtags metrics ========================================================================
     mentions = tweets_to_mentions(tweets, unique_hashtags)
 
-    ## Read tweets and compute hashtags+users/mentions metrics =================
+    ## Read tweets and compute hashtags+users/mentions metrics =========================================================
     bipartite = tweets_to_bipartite(tweets, unique_hashtags, unique_mentions)
 
-    ## Read tweets and compute hashtags+users/mentions attributes===============
+    ## Read tweets and compute hashtags+users/mentions attributes ======================================================
     attributes = tweets_to_attributes(tweets, unique_hashtags, unique_mentions)
 
 
-    ## Write output file, depending on the selected format =====================
+    ## Write output file, depending on the selected format =============================================================
     if outputformat == 'cytoscape':
         if exporttype == 'hashtags':
             export_cytoscape(hashtags, outputfilename)
@@ -271,7 +338,14 @@ def main(jsonfilename, outputformat, outputfilename, exporttype):
         elif exporttype == 'attributes':
             export_cytoscape(attributes, outputfilename)
     elif outputformat == 'gephi':
-        raise(Exception('gephi format not yet available.'))
+        if exporttype == 'hashtags':
+            export_gephi(hashtags, attributes, outputfilename)
+        elif exporttype == 'mentions':
+            export_gephi(mentions, attributes, outputfilename)
+        elif exporttype == 'bipartite':
+            export_gephi(bipartite, attributes, outputfilename)
+        elif exporttype == 'attributes':
+            raise(Exception('no need to export attributes, they are in the GDF file already.'))
 
 
 if __name__ == '__main__':

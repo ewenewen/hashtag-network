@@ -4,5 +4,6 @@
 *.log
 __pycache__
 *.cys
+*.gdf
 credentials.py
 .ropeproject/
