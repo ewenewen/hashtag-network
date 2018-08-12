@@ -58,12 +58,12 @@ def tweets_to_hashtags(tweets, unique_mentions):
 
             # Save everything in a dico of dico
             if entry not in net.keys():
-                net[entry] = {'n': 1, 'fav': fav, 'rt': rt, 'score': 1*(fav+rt)}
+                net[entry] = {'n': 1, 'fav': fav, 'rt': rt, 'score': 1 +fav+rt}
             else:
                 net[entry]['n'] += 1
                 net[entry]['fav'] += fav
                 net[entry]['rt'] += rt
-                net[entry]['score'] = net[entry]['n'] * (net[entry]['fav'] + net[entry]['rt'])
+                net[entry]['score'] = net[entry]['n'] + net[entry]['fav'] + net[entry]['rt']
     return(net)
 
 def tweets_to_mentions(tweets, unique_hashtags):
@@ -102,12 +102,12 @@ def tweets_to_mentions(tweets, unique_hashtags):
 
             # Save everything in a dico of dico
             if entry not in net.keys():
-                net[entry] = {'n': 1, 'fav': fav, 'rt': rt, 'score': 1*(fav+rt)}
+                net[entry] = {'n': 1, 'fav': fav, 'rt': rt, 'score': 1+fav+rt}
             else:
                 net[entry]['n'] += 1
                 net[entry]['fav'] += fav
                 net[entry]['rt'] += rt
-                net[entry]['score'] = net[entry]['n'] * (net[entry]['fav'] + net[entry]['rt'])
+                net[entry]['score'] = net[entry]['n'] + net[entry]['fav'] + net[entry]['rt']
     return(net)
 
 def tweets_to_bipartite(tweets, unique_hashtags, unique_mentions):
@@ -136,12 +136,12 @@ def tweets_to_bipartite(tweets, unique_hashtags, unique_mentions):
 
                 # Save everything in a dico f dico
                 if entry not in net.keys():
-                    net[entry] = {'n': 1, 'fav': fav, 'rt': rt, 'score': 1*(fav+rt)}
+                    net[entry] = {'n': 1, 'fav': fav, 'rt': rt, 'score': 1+fav+rt}
                 else:
                     net[entry]['n'] += 1
                     net[entry]['fav'] += fav
                     net[entry]['rt'] += rt
-                    net[entry]['score'] = net[entry]['n'] * (net[entry]['fav'] + net[entry]['rt'])
+                    net[entry]['score'] = net[entry]['n'] + net[entry]['fav'] + net[entry]['rt']
     return(net)
 
 def tweets_to_attributes(tweets, unique_hashtags, unique_mentions):
@@ -166,12 +166,12 @@ def tweets_to_attributes(tweets, unique_hashtags, unique_mentions):
             fav = tweets[id]['fav']
 
             if m2 not in attr.keys():
-                attr[m2] = {'type': 'user', 'mentions': 1, 'tweets': 0, 'fav': fav, 'rt': rt, 'score': 1*(fav+rt)}
+                attr[m2] = {'type': 'user', 'mentions': 1, 'tweets': 0, 'fav': fav, 'rt': rt, 'score': 1+fav+rt}
             else:
                 attr[m2]['mentions'] += 1
                 attr[m2]['fav'] += fav
                 attr[m2]['rt'] += rt
-                attr[m2]['score'] = attr[m2]['mentions'] * (attr[m2]['fav'] + attr[m2]['rt'])
+                attr[m2]['score'] = attr[m2]['mentions'] + attr[m2]['fav'] + attr[m2]['rt']
 
         # For each user, make/update an entry
         for u2 in u:
@@ -192,12 +192,12 @@ def tweets_to_attributes(tweets, unique_hashtags, unique_mentions):
             fav = tweets[id]['fav']
 
             if h2 not in attr.keys():
-                attr[h2] = {'type': 'hashtag', 'mentions': 1, 'tweets': 0, 'fav': fav, 'rt': rt, 'score': 1*(fav+rt)}
+                attr[h2] = {'type': 'hashtag', 'mentions': 1, 'tweets': 0, 'fav': fav, 'rt': rt, 'score': 1+fav+rt}
             else:
                 attr[h2]['mentions'] += 1
                 attr[h2]['fav'] += fav
                 attr[h2]['rt'] += rt
-                attr[h2]['score'] = attr[h2]['mentions'] * (attr[h2]['fav'] + attr[h2]['rt'])
+                attr[h2]['score'] = attr[h2]['mentions'] + attr[h2]['fav'] + attr[h2]['rt']
     return(attr)
 
 def export_cytoscape(dico, outputfilename):
