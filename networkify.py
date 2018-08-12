@@ -239,11 +239,24 @@ def export_gephi(dico, attributes, outputfilename):
             col_type = "VARCHAR"
         f.write(', ' + col + ' ' + col_type)
 
+
+    ## We need a list of the nodes present in the graph
+    present_nodes = list(map(lambda key: key.split("\t"), dico.keys()))
+    present_nodes = [item for sublist in present_nodes for item in sublist]
+    present_nodes = set(present_nodes)
+
     ## Actual filling of the data
     for node in attributes.keys():
-        f.write('\n' + node)
-        for col in col_attributes_list:
-            f.write(',' + str(attributes[node][col]))
+
+        ## Check that the node is indeed in the network
+        if node in present_nodes:
+
+            ## Write the node
+            f.write('\n' + node)
+
+            ## And all its attributes
+            for col in col_attributes_list:
+                f.write(',' + str(attributes[node][col]))
 
 
     ### Edges ==========================================================================================================
